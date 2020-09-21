@@ -4,13 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tarefa extends Model
+class RoteirosHasTarefas extends Model
 {
     protected $fillable = [
-        'nome',
-        'descricao',
-        'apresentacao_ordem',
-        'icone'
+        'roteiro_id',
+        'tarefa_id',
+        'status',
     ];
 
     const CREATED_AT = 'criado_em';

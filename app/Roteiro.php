@@ -6,9 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Roteiro extends Model
 {
-    protected $hidden = [
-        'senha',
+    protected $fillable = [
+        'cliente_id',
+        'usuario_id',
+        'data_execucao',
+        'ordem_execucao'
     ];
+
+    const CREATED_AT = 'criado_em';
+    const UPDATED_AT = 'atualizado_em';
 
     public function cliente()
     {

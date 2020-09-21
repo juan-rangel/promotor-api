@@ -5,8 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RoteiroResource;
 use App\Roteiro;
+use App\RoteirosHasTarefas;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreRoteiroPost;
+use Exception;
 
 class RoteiroController extends Controller
 {
@@ -31,15 +33,33 @@ class RoteiroController extends Controller
         $inputs = json_decode($request->getContent(), true);
 
         $return = [
-            'success' => true
+            'success' => true,
         ];
 
+        $roteiro = new Roteiro([
+            'cliente_id' => $inputs['cliente_id'],
+            'usuario_id' => $inputs['usuario_id'],
+            'data_execucao' => $inputs['data_execucao'],
+            'ordem_execucao' => $inputs['ordem_execucao'],
+        ]);
+
         try {
-            Roteiro::create($inputs);
+            $roteiro->save();
+            $return['model'] = $roteiro;
         } catch (\Throwable $th) {
-            $return = [
-                'success' => false
-            ];
+            throw new Exception('não conseguimos realizar o cadastro do roteiro');
+        }
+
+        try {
+            foreach ($inputs['tarefa_id'] as $key => $value) {
+                RoteirosHasTarefas::create([
+                    'roteiro_id' => $roteiro->id,
+                    'tarefa_id' => $key, // corrigir na view pra vir somente o id 
+                    'status' => false,
+                ]);
+            }
+        } catch (\Throwable $th) {
+            throw new Exception('não conseguimos realizar o cadastro das tarefas do roteiro');
         }
 
         return response()->json($return);
