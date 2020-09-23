@@ -12,14 +12,3 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::middleware(['cors'])->group(function () {
-    Route::apiResources([
-        'usuarios' => 'API\UsuarioController',
-        'usuarios.roteiros' => 'API\UsuarioRoteiroController',
-        'roteiros.tarefas' => 'API\RoteiroTarefaController',
-        'roteiros' => 'API\RoteiroController',
-        'clientes' => 'API\ClienteController',
-        'tarefas' => 'API\TarefaController',
-    ]);
-});

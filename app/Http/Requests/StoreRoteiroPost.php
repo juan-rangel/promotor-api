@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRoteiroPost extends FormRequest
 {
@@ -13,7 +15,7 @@ class StoreRoteiroPost extends FormRequest
      */
     public function validationData()
     {
-        return json_decode($this->getContent(), true);
+        return json_decode($this->getContent(), true) ?? $this->all();
     }
 
     /**
@@ -35,7 +37,7 @@ class StoreRoteiroPost extends FormRequest
     {
         return [
             'usuario_id' => 'required',
-            'tarefa_id' => 'min:1',
+            'tarefa_id' => 'required',
             'cliente_id' => 'required',
             'data_execucao' => 'required',
             'ordem_execucao' => 'required',
@@ -52,7 +54,7 @@ class StoreRoteiroPost extends FormRequest
         return [
             'usuario_id.required' => 'o campo :attribute deve ser preenchido',
             'cliente_id.required' => 'o campo :attribute deve ser preenchido',
-            'tarefa_id.min' => 'ao menos uma :attribute deve ser preenchida',
+            'tarefa_id.tarefa_id' => 'ao menos uma :attribute deve ser preenchida',
             'data_execucao.required' => 'o campo :attribute deve ser preenchido',
             'ordem_execucao.required' => 'o campo :attribute deve ser preenchido',
         ];
@@ -72,5 +74,18 @@ class StoreRoteiroPost extends FormRequest
             'data_execucao' => 'data de execução',
             'ordem_execucao' => 'ordem de execução',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
 }

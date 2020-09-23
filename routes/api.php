@@ -19,3 +19,14 @@ use Illuminate\Support\Facades\Route;
 
 //     // return $request->user();
 // });
+
+Route::apiResources([
+    'usuarios' => 'API\UsuarioController',
+    'usuarios.roteiros' => 'API\UsuarioRoteiroController',
+    'roteiros.tarefas' => 'API\RoteiroTarefaController',
+    'roteiros' => 'API\RoteiroController',
+    'clientes' => 'API\ClienteController',
+    'tarefas' => 'API\TarefaController',
+]);
+
+Route::delete('roteiros/{roteiros}/multiples', 'API\RoteiroController@destroyMultiples')->name('roteiros.destroy-multiples');;

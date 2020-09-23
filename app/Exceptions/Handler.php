@@ -4,6 +4,8 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
@@ -55,14 +57,12 @@ class Handler extends ExceptionHandler
         if ($request->header('Content-Type') == 'application/json' || $request->header('Content-Type') == 'application/x-www-form-urlencoded') {
 
             /*  is this exception? */
-
             if (!empty($exception)) {
 
                 // set default error message
                 $response = [
                     'error' => $exception->getMessage()
                 ];
-
 
                 // If debug mode is enabled
                 if (config('app.debug')) {
@@ -78,28 +78,21 @@ class Handler extends ExceptionHandler
 
                 // is this validation exception
                 if ($exception instanceof ValidationException) {
-
                     return $this->convertValidationExceptionToResponse($exception, $request);
 
                     // is it authentication exception
                 } else if ($exception instanceof AuthenticationException) {
-
                     $status = 401;
-
                     $response['error'] = 'Can not finish authentication!';
 
                     //is it DB exception
                 } else if ($exception instanceof \PDOException) {
-
                     $status = 500;
-
                     $response['error'] = 'Can not finish your query request!';
 
                     // is it http exception (this can give us status code)
                 } else if ($this->isHttpException($exception)) {
-
                     $status = $exception->getStatusCode();
-
                     $response['error'] = 'Request error!';
                 } else {
 
