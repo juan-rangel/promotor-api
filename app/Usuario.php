@@ -10,6 +10,9 @@ class Usuario extends Model
         'senha',
     ];
 
+    const CREATED_AT = 'criado_em';
+    const UPDATED_AT = 'atualizado_em';
+
     public function roteiros()
     {
         return $this->hasMany(Roteiro::class, 'usuario_id');

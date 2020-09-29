@@ -5,7 +5,12 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UsuarioResource;
+use App\Http\Requests\AuthUsuarioPost;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Encryption\DecryptException;
 use App\Usuario;
+use Exception;
 
 class UsuarioController extends Controller
 {
@@ -20,7 +25,7 @@ class UsuarioController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            if ($request->path() == 'usuarios' && $request->method() === 'GET') {
+            if ($request->path() == 'api/usuarios' && $request->method() === 'GET') {
                 $this->modelParametrizada = Usuario::query()
                     ->when($request->filled('email'), function ($query) use ($request) {
                         $query->where('email', '=', $request->email);
@@ -84,5 +89,33 @@ class UsuarioController extends Controller
     public function destroy(Usuario $usuario)
     {
         //
+    }
+
+    /**
+     * Validate the user to login.
+     *
+     * @param  \App\Usuario  $usuario
+     * @return \Illuminate\Http\Response
+     */
+    public function auth(AuthUsuarioPost $request)
+    {
+        try {
+            $usuario = Usuario::where('email', $request->email)->firstOrFail();
+            $return['model'] = $usuario;
+        } catch (\Throwable $th) {
+            throw new ModelNotFoundException('não conseguimos localizar seu usuário');
+        }
+
+        try {
+            $decryptedPassword = Crypt::decryptString($usuario->senha);
+        } catch (\Throwable $th) {
+            throw new DecryptException('seu cadastro não está atualizado');
+        }
+
+        if ($decryptedPassword !== $request->senha) {
+            throw new Exception('senhas não conferem');
+        }
+
+        return new UsuarioResource($usuario);
     }
 }

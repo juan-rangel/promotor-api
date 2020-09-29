@@ -6,6 +6,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Support\Str;
 
 class Handler extends ExceptionHandler
 {
@@ -54,7 +55,8 @@ class Handler extends ExceptionHandler
     {
         // return response()->json($request->header('Content-Type'));
         // is this request asks for json?
-        if ($request->header('Content-Type') == 'application/json' || $request->header('Content-Type') == 'application/x-www-form-urlencoded') {
+        // return response()->json($exception->getMessage());
+        if (Str::contains($request->header('Content-Type'), ['application/json', 'application/x-www-form-urlencoded'])) {
 
             /*  is this exception? */
             if (!empty($exception)) {

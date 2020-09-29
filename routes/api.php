@@ -14,12 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return view('welcome');
-
-//     // return $request->user();
-// });
-
 Route::apiResources([
     'usuarios' => 'API\UsuarioController',
     'usuarios.roteiros' => 'API\UsuarioRoteiroController',
@@ -30,3 +24,4 @@ Route::apiResources([
 ]);
 
 Route::delete('roteiros/{roteiros}/multiples', 'API\RoteiroController@destroyMultiples')->name('roteiros.destroy-multiples');;
+Route::post('usuarios/auth', 'API\UsuarioController@auth')->name('usuarios.auth');;
