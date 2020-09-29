@@ -9,6 +9,16 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 class AuthUsuarioPost extends FormRequest
 {
     /**
+     * Get data to be validated from the request.
+     *
+     * @return array
+     */
+    public function validationData()
+    {
+        return json_decode($this->getContent(), true) ?? $this->all();
+    }
+
+    /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
@@ -42,5 +52,18 @@ class AuthUsuarioPost extends FormRequest
             'email.required' => 'o campo :attribute deve ser preenchido',
             'senha.required' => 'o campo :attribute deve ser preenchido',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
 }
