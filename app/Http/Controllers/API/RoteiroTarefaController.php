@@ -5,8 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Roteiro;
 use App\Tarefa;
+use App\RoteirosHasTarefas;
 use Illuminate\Http\Request;
 use App\Http\Resources\TarefaResource;
+use App\Http\Resources\RoteiroHasTarefaResource;
 
 class RoteiroTarefaController extends Controller
 {
@@ -42,8 +44,17 @@ class RoteiroTarefaController extends Controller
      */
     public function show(Roteiro $roteiro, Tarefa $tarefa)
     {
-        dd($roteiro, $tarefa);
-        return TarefaResource::collection($roteiro->tarefas()->get());
+        // dd(
+        //     RoteirosHasTarefas::query()
+        //         // ->selectRaw('JSON_UNQUOTE(JSON_EXTRACT(conteudo, "$.observacao")), id')
+        //         ->selectRaw('JSON_KEYS(conteudo)')
+        //         ->whereRaw('JSON_EXTRACT(conteudo, "$.observacao") is not null')
+        //         ->get()
+        // );
+        return new RoteiroHasTarefaResource(RoteirosHasTarefas::where([
+            'roteiro_id' => $roteiro->id,
+            'tarefa_id' => $tarefa->id
+        ])->first());
     }
 
     /**

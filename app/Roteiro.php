@@ -10,7 +10,8 @@ class Roteiro extends Model
         'cliente_id',
         'usuario_id',
         'data_execucao',
-        'ordem_execucao'
+        'ordem_execucao',
+        'status',
     ];
 
     const CREATED_AT = 'criado_em';
