@@ -18,7 +18,7 @@ class UsuarioRoteiroController extends Controller
      */
     public function index(Usuario $usuario)
     {
-        return RoteiroResource::collection($usuario->roteiros()->get());
+        return RoteiroResource::collection($usuario->roteiros()->where('status', false)->get());
     }
 
     /**

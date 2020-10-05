@@ -84,9 +84,8 @@ class RoteiroController extends Controller
      * @param  \App\Roteiro  $roteiro
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreRoteiroPost $request, Roteiro $roteiro)
+    public function update(Request $request, Roteiro $roteiro)
     {
-        $inputs = json_decode($request->getContent(), true);
 
         $return = [
             'success' => true,
@@ -94,26 +93,44 @@ class RoteiroController extends Controller
         ];
 
         try {
-            $roteiro->cliente_id = $inputs['cliente_id'];
-            $roteiro->data_execucao = $inputs['data_execucao'];
-            $roteiro->ordem_execucao = $inputs['ordem_execucao'];
-            $roteiro->usuario_id = $inputs['usuario_id'];
+            if ($request->filled('cliente_id')) {
+                $roteiro->cliente_id = $request->cliente_id;
+            }
+
+            if ($request->filled('data_execucao')) {
+                $roteiro->data_execucao = $request->data_execucao;
+            }
+
+            if ($request->filled('ordem_execucao')) {
+                $roteiro->ordem_execucao = $request->ordem_execucao;
+            }
+
+            if ($request->filled('usuario_id')) {
+                $roteiro->usuario_id = $request->usuario_id;
+            }
+
+            if ($request->filled('status')) {
+                $roteiro->status = $request->status;
+            }
+
             $roteiro->save();
 
             $return['model'] = $roteiro;
         } catch (\Throwable $th) {
-            throw new Exception('não realizar a atualização');
+            throw new Exception('não conseguimos realizar a atualização');
         }
 
         try {
-            RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->delete();
-            // RoteirosHasTarefas::where(1)->truncate();
-            foreach ($inputs['tarefa_id'] as $key => $value) {
-                RoteirosHasTarefas::create([
-                    'roteiro_id' => $roteiro->id,
-                    'tarefa_id' => $key, // corrigir na view pra vir somente o id 
-                    'status' => false,
-                ]);
+            if ($request->filled('tarefa_id')) {
+                RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->delete();
+                // RoteirosHasTarefas::where(1)->truncate();
+                foreach ($inputs['tarefa_id'] as $key => $value) {
+                    RoteirosHasTarefas::create([
+                        'roteiro_id' => $roteiro->id,
+                        'tarefa_id' => $key, // corrigir na view pra vir somente o id 
+                        'status' => false,
+                    ]);
+                }
             }
         } catch (\Throwable $th) {
             throw new Exception('não conseguimos realizar o cadastro das tarefas do roteiro');

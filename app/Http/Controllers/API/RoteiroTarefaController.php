@@ -42,7 +42,8 @@ class RoteiroTarefaController extends Controller
      */
     public function show(Roteiro $roteiro, Tarefa $tarefa)
     {
-        //
+        dd($roteiro, $tarefa);
+        return TarefaResource::collection($roteiro->tarefas()->get());
     }
 
     /**
