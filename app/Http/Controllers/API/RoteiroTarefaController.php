@@ -9,6 +9,7 @@ use App\RoteirosHasTarefas;
 use Illuminate\Http\Request;
 use App\Http\Resources\TarefaResource;
 use App\Http\Resources\RoteiroHasTarefaResource;
+use Illuminate\Support\Facades\DB;
 
 class RoteiroTarefaController extends Controller
 {
@@ -44,13 +45,6 @@ class RoteiroTarefaController extends Controller
      */
     public function show(Roteiro $roteiro, Tarefa $tarefa)
     {
-        // dd(
-        //     RoteirosHasTarefas::query()
-        //         // ->selectRaw('JSON_UNQUOTE(JSON_EXTRACT(conteudo, "$.observacao")), id')
-        //         ->selectRaw('JSON_KEYS(conteudo)')
-        //         ->whereRaw('JSON_EXTRACT(conteudo, "$.observacao") is not null')
-        //         ->get()
-        // );
         return new RoteiroHasTarefaResource(RoteirosHasTarefas::where([
             'roteiro_id' => $roteiro->id,
             'tarefa_id' => $tarefa->id
@@ -67,7 +61,23 @@ class RoteiroTarefaController extends Controller
      */
     public function update(Request $request, Roteiro $roteiro, Tarefa $tarefa)
     {
-        //
+        $return = [
+            'success' => true,
+            'message' => 'atualização feita com sucesso',
+        ];
+
+        try {
+            DB::table('roteiros_has_tarefas')
+                ->where([
+                    'roteiro_id' => $roteiro->id,
+                    'tarefa_id' => $tarefa->id
+                ])
+                ->update(['conteudo->observacao' => $request->observacao]);
+        } catch (\Throwable $th) {
+            throw new Exception('não conseguimos realizar a atualização');
+        }
+
+        return response()->json($return);
     }
 
     /**

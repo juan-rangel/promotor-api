@@ -86,6 +86,11 @@ class RoteiroController extends Controller
      */
     public function update(Request $request, Roteiro $roteiro)
     {
+        try {
+            $inputs = json_decode($request->getContent(), true);
+        } catch (\Throwable $th) {
+            $inputs = $request->all();
+        }
 
         $return = [
             'success' => true,
@@ -93,24 +98,24 @@ class RoteiroController extends Controller
         ];
 
         try {
-            if ($request->filled('cliente_id')) {
-                $roteiro->cliente_id = $request->cliente_id;
+            if (isset($inputs['cliente_id'])) {
+                $roteiro->cliente_id = $inputs['cliente_id'];
             }
 
-            if ($request->filled('data_execucao')) {
-                $roteiro->data_execucao = $request->data_execucao;
+            if (isset($inputs['data_execucao'])) {
+                $roteiro->data_execucao = $inputs['data_execucao'];
             }
 
-            if ($request->filled('ordem_execucao')) {
-                $roteiro->ordem_execucao = $request->ordem_execucao;
+            if (isset($inputs['ordem_execucao'])) {
+                $roteiro->ordem_execucao = $inputs['ordem_execucao'];
             }
 
-            if ($request->filled('usuario_id')) {
-                $roteiro->usuario_id = $request->usuario_id;
+            if (isset($inputs['usuario_id'])) {
+                $roteiro->usuario_id = $inputs['usuario_id'];
             }
 
-            if ($request->filled('status')) {
-                $roteiro->status = $request->status;
+            if (isset($inputs['status'])) {
+                $roteiro->status = $inputs['status'];
             }
 
             $roteiro->save();
@@ -121,7 +126,7 @@ class RoteiroController extends Controller
         }
 
         try {
-            if ($request->filled('tarefa_id')) {
+            if (isset($inputs['tarefa_id'])) {
                 RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->delete();
                 // RoteirosHasTarefas::where(1)->truncate();
                 foreach ($inputs['tarefa_id'] as $key => $value) {
