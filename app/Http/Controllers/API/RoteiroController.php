@@ -30,7 +30,11 @@ class RoteiroController extends Controller
      */
     public function store(StoreRoteiroPost $request)
     {
-        $inputs = json_decode($request->getContent(), true);
+        try {
+            $inputs = json_decode($request->getContent(), true);
+        } catch (\Throwable $th) {
+            $inputs = $request->all();
+        }
 
         $return = [
             'success' => true,
@@ -52,15 +56,11 @@ class RoteiroController extends Controller
         }
 
         try {
-            foreach ($inputs['tarefa_id'] as $key => $value) {
-                RoteirosHasTarefas::create([
-                    'roteiro_id' => $roteiro->id,
-                    'tarefa_id' => $key, // corrigir na view pra vir somente o id 
-                    'status' => false,
-                ]);
-            }
+            $roteiroTarefaController = new RoteiroTarefaController();
+            $roteiroTarefaController->store($request, $roteiro);
         } catch (\Throwable $th) {
-            throw new Exception('não conseguimos realizar o cadastro das tarefas do roteiro');
+            throw new Exception($th->getMessage());
+            // throw new Exception('não conseguimos realizar o cadastro das tarefas do roteiro');
         }
 
         return response()->json($return);
@@ -129,13 +129,8 @@ class RoteiroController extends Controller
             if (isset($inputs['tarefa_id'])) {
                 RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->delete();
                 // RoteirosHasTarefas::where(1)->truncate();
-                foreach ($inputs['tarefa_id'] as $key => $value) {
-                    RoteirosHasTarefas::create([
-                        'roteiro_id' => $roteiro->id,
-                        'tarefa_id' => $key, // corrigir na view pra vir somente o id 
-                        'status' => false,
-                    ]);
-                }
+                $roteiroTarefaController = new RoteiroTarefaController();
+                $roteiroTarefaController->store($request, $roteiro);
             }
         } catch (\Throwable $th) {
             throw new Exception('não conseguimos realizar o cadastro das tarefas do roteiro');

@@ -9,7 +9,9 @@ use App\RoteirosHasTarefas;
 use Illuminate\Http\Request;
 use App\Http\Resources\TarefaResource;
 use App\Http\Resources\RoteiroHasTarefaResource;
+use App\Services\RoteiroTarefaService;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class RoteiroTarefaController extends Controller
 {
@@ -33,7 +35,31 @@ class RoteiroTarefaController extends Controller
      */
     public function store(Request $request, Roteiro $roteiro)
     {
-        //
+        try {
+            $inputs = json_decode($request->getContent(), true);
+        } catch (\Throwable $th) {
+            $inputs = $request->all();
+        }
+
+        $return = [
+            'success' => true,
+            'message' => 'cadastro feito com sucesso',
+        ];
+
+        try {
+            foreach ($inputs['tarefa_id'] as $key => $value) {
+                RoteirosHasTarefas::create([
+                    'roteiro_id' => $roteiro->id,
+                    'tarefa_id' => $key, // corrigir na view pra vir somente o id 
+                    'status' => false,
+                    'conteudo' => RoteiroTarefaService::getJsonConteudoPadrao()
+                ]);
+            }
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage());
+        }
+
+        return response()->json($return);
     }
 
     /**

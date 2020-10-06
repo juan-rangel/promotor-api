@@ -10,6 +10,7 @@ class RoteirosHasTarefas extends Model
         'roteiro_id',
         'tarefa_id',
         'status',
+        'conteudo',
     ];
 
     const CREATED_AT = 'criado_em';
