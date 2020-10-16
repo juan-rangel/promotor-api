@@ -15,7 +15,7 @@ return [
     'saleshunter' => [
         // Ambiente de Produção
         'production' => [
-            'urlBase' => 'http://saleshunter.vitao.com.br/api',
+            'urlBase' => 'http://piloto-sh.abrascort.com.br/api',
         ],
 
         // Ambiente de Desenvolvimento

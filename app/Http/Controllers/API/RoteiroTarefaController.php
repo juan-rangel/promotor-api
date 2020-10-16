@@ -92,14 +92,18 @@ class RoteiroTarefaController extends Controller
             'message' => 'atualização feita com sucesso',
         ];
 
-        return response()->json($request->all());
         try {
             DB::table('roteiros_has_tarefas')
                 ->where([
                     'roteiro_id' => $roteiro->id,
-                    'tarefa_id' => $tarefa->id
+                    // 'tarefa_id' => $tarefa->id
                 ])
-                ->update(['conteudo->observacao' => $request->observacao]);
+                ->when($request->filled("observacao"), function ($query) use ($request) {
+                    $query->update(['conteudo->observacao' => $request->observacao]);
+                })
+                ->when($request->filled("produtosCadastrados"), function ($query) use ($request) {
+                    $query->update(['conteudo->produtosCadastrados' => 'testeaaaaaaaaaaa']);
+                });
         } catch (\Throwable $th) {
             throw new Exception('não conseguimos realizar a atualização');
         }
