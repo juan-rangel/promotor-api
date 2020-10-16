@@ -92,6 +92,7 @@ class RoteiroTarefaController extends Controller
             'message' => 'atualização feita com sucesso',
         ];
 
+        return response()->json($request->all());
         try {
             DB::table('roteiros_has_tarefas')
                 ->where([
