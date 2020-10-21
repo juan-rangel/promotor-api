@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use App\Http\Resources\TarefaResource;
 use App\Http\Resources\RoteiroHasTarefaResource;
 use App\Services\RoteiroTarefaService;
-use Illuminate\Support\Facades\DB;
 use Exception;
 
 class RoteiroTarefaController extends Controller
@@ -93,18 +92,27 @@ class RoteiroTarefaController extends Controller
         ];
 
         try {
-            DB::table('roteiros_has_tarefas')
-                ->where([
-                    'roteiro_id' => $roteiro->id,
-                    // 'tarefa_id' => $tarefa->id
-                ])
+            RoteirosHasTarefas::where([
+                'roteiro_id' => $roteiro->id,
+                // 'tarefa_id' => $tarefa->id
+            ])
                 ->when($request->filled("observacao"), function ($query) use ($request) {
                     $query->update(['conteudo->observacao' => $request->observacao]);
                 })
-                ->when($request->filled("produtosCadastrados"), function ($query) use ($request) {
-                    $query->update(['conteudo->produtosCadastrados' => 'testeaaaaaaaaaaa']);
+                ->when($request->filled("produtosCadastrados"), function ($query) use ($request, $roteiro) {
+                    $roteirosHasTarefas = RoteirosHasTarefas::selectRaw('JSON_EXTRACT(conteudo, "$.produtosCadastrados") as produtosCadastrados')
+                        ->where([
+                            'roteiro_id' => $roteiro->id,
+                            // 'tarefa_id' => $tarefa->id
+                        ])->first();
+
+                    $documento = collect(json_decode($roteirosHasTarefas->produtosCadastrados));
+                    $documento->firstWhere('sap_cod_produto', $request->produtosCadastrados['sap_cod_produto'])->estoque_fisico = $request->produtosCadastrados['estoque'];
+
+                    $query->update(['conteudo->produtosCadastrados' => json_decode($documento)]);
                 });
         } catch (\Throwable $th) {
+            return response([$th->getMessage()]);
             throw new Exception('não conseguimos realizar a atualização');
         }
 
