@@ -25,4 +25,4 @@ Route::apiResources([
 
 Route::delete('roteiros/{roteiros}/multiples', 'API\RoteiroController@destroyMultiples')->name('roteiros.destroy-multiples');;
 Route::post('usuarios/auth', 'API\UsuarioController@auth')->name('usuarios.auth');;
-Route::post('roteiros/{roteiro}/tarefas/{tarefa}/comunicar-ruptura', 'API\RoteiroTarefaController@comunicateRupture')->name('roteiros.tarefas.comunicar-rupture');;
+Route::get('roteiros/{roteiro}/tarefas/{tarefa}/comunicar-ruptura', 'API\RoteiroTarefaController@comunicateRupture')->name('roteiros.tarefas.comunicar-rupture');;
