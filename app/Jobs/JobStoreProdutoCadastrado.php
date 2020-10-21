@@ -35,7 +35,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
     public function __construct(Cliente $cliente)
     {
         $this->cliente = $cliente;
-        // $this->handle();
+        $this->handle();
     }
 
     /**
@@ -49,10 +49,8 @@ class JobStoreProdutoCadastrado implements ShouldQueue
 
         foreach ($roteiros as &$roteiro) {
             $produtosCadastrados = RequestSalesHunter::enviarRequest('cliente_produtos_cadastrados', ['sap_cod_cliente' => $this->cliente->sap_cod_cliente]);
-
             $this->injectJson($produtosCadastrados);
             RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->update(['conteudo->produtosCadastrados' => $produtosCadastrados]);
-            echo "#atualizando: {$roteiro->id}" . \PHP_EOL;
             unset($roteiro);
             unset($produtosCadastrados);
         }
@@ -63,6 +61,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
     private function injectJson(&$produtosCadastrados)
     {
         $getGenerator = fn ($req) => yield $req;
+
         foreach ($produtosCadastrados as $k => &$produto) {
             try {
                 $produto['estoque_fisico'] = -1;
@@ -89,7 +88,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
                 unset($simplus);
                 unset($saleshunter);
             } catch (\Throwable $th) {
-                dd($produto);
+                print_r($th->getMessage());
                 //throw $th;
             }
         }
@@ -125,6 +124,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
              * 
              * Busca o tamanho de cada imagem hospedada na simplus
              */
+
             $pivotCollectionImagens = $pivot['imagem']->map(function ($item) {
                 $item['size'] = (float) Http::get($item['url'])->header('Content-Length');
                 return $item;
@@ -138,7 +138,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
             $pivot['imagem'] = $pivotCollectionImagens->firstWhere('size', $pivotCollectionImagens->min('size'));
             unset($pivotCollectionImagens);
         } catch (\Throwable $th) {
-            // dd($th);
+            print_r($th->getMessage());
         }
 
         $response = $pivot;
