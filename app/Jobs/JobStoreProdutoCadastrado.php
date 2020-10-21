@@ -65,6 +65,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
         $getGenerator = fn ($req) => yield $req;
         foreach ($produtosCadastrados as $k => &$produto) {
             try {
+                $produto['estoque_fisico'] = -1;
                 $saleshunter = $getGenerator(RequestSalesHunter::enviarRequest('cliente_ultimos_produtos_comprados_produto', [
                     'sap_cod_cliente' => $this->cliente->sap_cod_cliente,
                     'sap_cod_produto' => $produto['sap_cod_produto']
