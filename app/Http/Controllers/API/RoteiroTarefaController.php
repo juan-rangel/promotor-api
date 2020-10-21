@@ -9,6 +9,7 @@ use App\RoteirosHasTarefas;
 use Illuminate\Http\Request;
 use App\Http\Resources\TarefaResource;
 use App\Http\Resources\RoteiroHasTarefaResource;
+use App\Notifications\LojaComRuptura;
 use App\Services\RoteiroTarefaService;
 use Exception;
 
@@ -129,5 +130,46 @@ class RoteiroTarefaController extends Controller
     public function destroy(Roteiro $roteiro, Tarefa $tarefa)
     {
         //
+    }
+
+    /**
+     * Send mail to comunicate above rupture.
+     *
+     * @param  \App\Roteiro  $roteiro
+     * @param  \App\Tarefa  $tarefa
+     * @return \Illuminate\Http\Response
+     */
+    public function comunicateRupture(Roteiro $roteiro, Tarefa $tarefa)
+    {
+        $return = [
+            'success' => true,
+            'message' => 'cadastro feito com sucesso',
+        ];
+
+        try {
+            $roteiroHasTarefas = RoteirosHasTarefas::where([
+                'roteiro_id' => $roteiro->id,
+                'tarefa_id' => $tarefa->id, // corrigir na view pra vir somente o id 
+            ])->first();
+
+            $produtosCadastrados = collect(json_decode($roteiroHasTarefas->conteudo)->produtosCadastrados);
+
+            $produtosComRuptura = $produtosCadastrados->filter(function ($prduto) {
+                return ($prduto->estoque_fisico >= 0 && $prduto->estoque_fisico <= 10);
+            });
+
+            $detalhes = collect([
+                'produtos' => $produtosComRuptura,
+                'cliente' => $roteiro->cliente,
+                'usuario' => $roteiro->usuario,
+                'roteiro' => $roteiro
+            ]);
+
+            $roteiro->usuario->notify(new LojaComRuptura($detalhes));
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage());
+        }
+
+        return response()->json($return);
     }
 }
