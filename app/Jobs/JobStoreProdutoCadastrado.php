@@ -35,7 +35,10 @@ class JobStoreProdutoCadastrado implements ShouldQueue
     public function __construct(Cliente $cliente)
     {
         $this->cliente = $cliente;
-        $this->handle();
+        /**
+         * Usar a linha comentada a baixo caso queira rodar o job sem precisar de queue
+         */
+        // $this->handle();
     }
 
     /**
@@ -58,6 +61,12 @@ class JobStoreProdutoCadastrado implements ShouldQueue
         unset($roteiros);
     }
 
+    /**
+     * Método para buscar as imagens na simplus e os ultimos produtos que foram comprados pela empresa
+     * 
+     * @todo incluir o ws de eans para buscar o ean correto do produto
+     * necessário para encontrar a imagem exata do produto na simplus
+     */
     private function injectJson(&$produtosCadastrados)
     {
         $getGenerator = fn ($req) => yield $req;
@@ -65,6 +74,8 @@ class JobStoreProdutoCadastrado implements ShouldQueue
         foreach ($produtosCadastrados as $k => &$produto) {
             try {
                 $produto['estoque_fisico'] = -1;
+                $produto['vencimentos'] = [];
+                $produto['concorrentes'] = [];
                 $saleshunter = $getGenerator(RequestSalesHunter::enviarRequest('cliente_ultimos_produtos_comprados_produto', [
                     'sap_cod_cliente' => $this->cliente->sap_cod_cliente,
                     'sap_cod_produto' => $produto['sap_cod_produto']

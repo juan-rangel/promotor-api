@@ -53,7 +53,6 @@ return [
         // Rotas dos WebServices
         'rotas' => [
             'produto' => '/manufacturer/products',
-            'teste' => '/layout',
         ],
     ],
 ];

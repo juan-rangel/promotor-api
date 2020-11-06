@@ -8,7 +8,8 @@ class RoteiroTarefaService
     {
         return (string) json_encode([
             'observacao' => "",
-            'produtosCadastrados' => ""
+            'conquistasRealizadas' => [],
+            'produtosCadastrados' => [],
         ]);
     }
 }
