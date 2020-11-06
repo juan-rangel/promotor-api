@@ -42,8 +42,12 @@ class ProdutosCadastradosPorCliente extends Command
         $clientes = Cliente::all();
 
         foreach ($clientes as &$cliente) {
-            // new JobStoreProdutoCadastrado($cliente);
             dispatch(new JobStoreProdutoCadastrado($cliente));
+
+            /**
+             * Usar a linha comentada a baixo para rodar o job sem precisar de queue
+             */
+            // new JobStoreProdutoCadastrado($cliente);
             unset($cliente);
         }
         unset($clientes);

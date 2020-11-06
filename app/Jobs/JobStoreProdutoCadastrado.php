@@ -35,6 +35,9 @@ class JobStoreProdutoCadastrado implements ShouldQueue
     public function __construct(Cliente $cliente)
     {
         $this->cliente = $cliente;
+        /**
+         * Usar a linha comentada a baixo caso queira rodar o job sem precisar de queue
+         */
         // $this->handle();
     }
 
@@ -49,10 +52,8 @@ class JobStoreProdutoCadastrado implements ShouldQueue
 
         foreach ($roteiros as &$roteiro) {
             $produtosCadastrados = RequestSalesHunter::enviarRequest('cliente_produtos_cadastrados', ['sap_cod_cliente' => $this->cliente->sap_cod_cliente]);
-
             $this->injectJson($produtosCadastrados);
             RoteirosHasTarefas::where('roteiro_id', $roteiro->id)->update(['conteudo->produtosCadastrados' => $produtosCadastrados]);
-            echo "#atualizando: {$roteiro->id}" . \PHP_EOL;
             unset($roteiro);
             unset($produtosCadastrados);
         }
@@ -60,11 +61,21 @@ class JobStoreProdutoCadastrado implements ShouldQueue
         unset($roteiros);
     }
 
+    /**
+     * Método para buscar as imagens na simplus e os ultimos produtos que foram comprados pela empresa
+     * 
+     * @todo incluir o ws de eans para buscar o ean correto do produto
+     * necessário para encontrar a imagem exata do produto na simplus
+     */
     private function injectJson(&$produtosCadastrados)
     {
         $getGenerator = fn ($req) => yield $req;
+
         foreach ($produtosCadastrados as $k => &$produto) {
             try {
+                $produto['estoque_fisico'] = -1;
+                $produto['vencimentos'] = [];
+                $produto['concorrentes'] = [];
                 $saleshunter = $getGenerator(RequestSalesHunter::enviarRequest('cliente_ultimos_produtos_comprados_produto', [
                     'sap_cod_cliente' => $this->cliente->sap_cod_cliente,
                     'sap_cod_produto' => $produto['sap_cod_produto']
@@ -88,7 +99,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
                 unset($simplus);
                 unset($saleshunter);
             } catch (\Throwable $th) {
-                dd($produto);
+                print_r($th->getMessage());
                 //throw $th;
             }
         }
@@ -124,6 +135,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
              * 
              * Busca o tamanho de cada imagem hospedada na simplus
              */
+
             $pivotCollectionImagens = $pivot['imagem']->map(function ($item) {
                 $item['size'] = (float) Http::get($item['url'])->header('Content-Length');
                 return $item;
@@ -137,7 +149,7 @@ class JobStoreProdutoCadastrado implements ShouldQueue
             $pivot['imagem'] = $pivotCollectionImagens->firstWhere('size', $pivotCollectionImagens->min('size'));
             unset($pivotCollectionImagens);
         } catch (\Throwable $th) {
-            // dd($th);
+            print_r($th->getMessage());
         }
 
         $response = $pivot;

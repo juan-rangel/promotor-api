@@ -20,7 +20,7 @@ return [
 
         // Ambiente de Desenvolvimento
         'development' => [
-            'urlBase' => 'http://127.0.0.1:8000/api',
+            'urlBase' => 'http://piloto-sh.abrascort.com.br/api',
         ],
 
         // Rotas dos WebServices
@@ -53,7 +53,6 @@ return [
         // Rotas dos WebServices
         'rotas' => [
             'produto' => '/manufacturer/products',
-            'teste' => '/layout',
         ],
     ],
 ];
